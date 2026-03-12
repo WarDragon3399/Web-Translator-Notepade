@@ -2,7 +2,6 @@
 
 chrome.action.onClicked.addListener(() => {
   chrome.tabs.create({
-    url: chrome.runtime.getURL("notepad.html"),
-    active: true
+    url: chrome.runtime.getURL("index.html")
   });
 });
