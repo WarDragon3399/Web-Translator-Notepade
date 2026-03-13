@@ -1,3 +1,4 @@
+<!-- Developed by Parthkumar Rathod wardragon -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,7 +42,16 @@
 <body>
 
 <div class="toolbar">
-    <button id="saveBtn">💾 Save</button>
+   <div style="position: relative; display: inline-block;">
+        <button id="saveMenuBtn" style="background: #2e89ff;">💾 Save As... ▾</button>
+        <div id="saveDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: var(--box); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 100; min-width: 150px;">
+           <div id="saveTxtBtn" style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+				<span>📝 Text (.txt)</span>
+				<span style="opacity: 0.5; font-size: 11px;">Ctrl+S</span>
+			</div>
+            <div id="savePdfBtn" style="padding: 10px; cursor: pointer;">📄 PDF (Print)</div>
+        </div>
+    </div>
     <button id="openBtn" class="btn-open">📂 Open</button>
     <input type="file" id="fileInput" style="display: none;" accept=".txt">
     <button id="shareBtn" class="btn-share">📤 Share</button>
