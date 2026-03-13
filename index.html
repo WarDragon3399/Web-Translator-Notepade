@@ -194,6 +194,15 @@
 				box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
 				border: 1px solid white;
 			}
+			
+			/* Misc */
+			#capsWarning {
+			display: none;
+			color: #ff9800;
+			font-size: 12px;
+			font-weight: bold;
+			margin-left: 10px;
+		}
 		</style>
 	</head>
 	<body>
@@ -217,6 +226,7 @@
 		<span id="statusLight" style="width: 12px; height: 12px; background: gray; border-radius: 50%; display: inline-block; margin: 0 5px;">
 		</span>
 		<span id="statusLight"></span>
+		<span id="capsWarning">CAPS ON</span>
 		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
 		<select id="srcLang">
 			<option value="auto">Auto-Detect</option>
@@ -293,8 +303,22 @@
 			<option value="Segoe UI">Default Font</option>
 		</select>
 		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
+			<button id="alignLeftBtn" title="Align Left (Ctrl+Shift+L)" style="background: #333;">|<</button>
+			<button id="alignCenterBtn" title="Align Center (Ctrl+Shift+E)" style="background: #333;">| - |</button>
+			<button id="alignRightBtn" title="Align Right (Ctrl+Shift+R)" style="background: #333;">>|</button>
+		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
+			<button id="colorBtn" title="Text Color" style="background: #333; display: flex; align-items: center; gap: 5px;">
+				<span style="color: #ff5555; border-bottom: 2px solid currentColor;">A</span>
+			</button>
+			<input type="color" id="colorPicker" style="display: none;" value="#2e89ff">	
+		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
 	</div>	
-	<div id="notepad" contenteditable="true" spellcheck="false"></div>
+	<div id="notepad" contenteditable="true" spellcheck="true" lang="en"></div>
+	<div id="statusBar" style="background: var(--box); padding: 5px 15px; font-size: 12px; border-top: 1px solid var(--border); display: flex; gap: 20px; color: #888;">
+		<span id="wordCount">Words: 0</span>
+		<span id="charCount">Characters: 0</span>
+	</div>
+	
 	<script src="logic.js"></script>
 	<script src="editor_tools.js"></script>
 	<div id="helpModal" class="modal-overlay">
@@ -314,7 +338,6 @@
 					<li style="margin-bottom: 10px; white-space: normal; word-break: break-word; font-style: italic;">Note: If using a new language first time, voice output may take some time.</li>
 					<li style="margin-bottom: 10px; white-space: normal; word-break: break-word;"><b>Shortcuts:</b> Use <b>Ctrl+B/I/U</b> for Bold, Italic, and Underline.</li>
 					<li style="margin-bottom: 10px; white-space: normal; word-break: break-word;"><b>Strikethrough:</b> Press <b>Alt+h+4</b> (Win) or <b>Cmd+Shift+X</b> (Mac).</li>
-					
 				</ul>
 			</div>
 
