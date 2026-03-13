@@ -207,7 +207,9 @@
 			<input type="file" id="fileInput" style="display: none;" accept=".txt">
 		<button id="shareBtn" class="btn-share">📤 Share</button>
 		<button id="micBtn" class="btn-voice">🎤 Start Voice</button>
-		<button id="stopMicBtn" class="btn-stop-voice">🛑 Stop Voice</button>
+		<button id="stopMicBtn" class="btn-stop-voice" style="display: none;">🛑 Stop Voice</button>
+		<span id="statusLight" style="width: 12px; height: 12px; background: gray; border-radius: 50%; display: inline-block; margin: 0 5px;">
+		</span>
 		<span id="statusLight"></span>
 		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
 		<select id="srcLang">
@@ -276,7 +278,8 @@
 		<button id="boldBtn" title="Bold (Ctrl+B)" style="background: #333;"><b>B</b></button>
 		<button id="italicBtn" title="Italic (Ctrl+I)" style="background: #333;"><i>I</i></button>
 		<button id="underlineBtn" title="Underline (Ctrl+U)" style="background: #333;"><u>U</u></button>
-		<button id="strikeBtn" title="Strike-through" style="background: #333;"><strike>abc</strike></button>   
+		<button id="strikeBtn" title="Strike-through" style="background: #333;"><strike>abc</strike></button>
+		<button id="bulletBtn" title="Bullets (Ctrl+Shift+8)" style="background: #333;">• List</button>		
 		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
 	</div>	
 	<div id="notepad" contenteditable="true" spellcheck="false"></div>
