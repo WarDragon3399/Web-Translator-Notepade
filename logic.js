@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusLight = document.getElementById('statusLight');
     const srcDropdown = document.getElementById('srcLang');
     const targetDropdown = document.getElementById('targetLang');
+	const srcLang = document.getElementById('srcLang');
 
     let silenceTimer;
     const SILENCE_LIMIT = 3000; 
@@ -86,7 +87,15 @@ if (Recognition) {
 
         if (finalTranscript) {
             // Inserts at cursor position
-            document.execCommand('insertText', false, " " + finalTranscript);
+            let processedText = finalTranscript;
+			const currentLang = document.getElementById('srcLang').value;
+
+			// Apply CapsLock only if it's ON and language is English
+			if (isCapsLockOn && currentLang.startsWith('en')) {
+				processedText = finalTranscript.toUpperCase();
+			}
+
+			document.execCommand('insertText', false, " " + processedText);
         }
 
         if (interimTranscript) {
@@ -170,6 +179,9 @@ function stopVoice() {
             const res = await fetch(url);
             const data = await res.json();
             notepad.innerText = data[0].map(item => item[0]).join("");
+			if (typeof updateCounts === "function") {
+				updateCounts(); 
+			}
         } catch (e) { console.error("Translation Error"); }
     }
 
@@ -326,5 +338,59 @@ function stopVoice() {
             document.getElementById('closeHelp').click();
         }
     });
+	
+	//checking is capslock is on or not
+	let isCapsLockOn = false;
+
+	// Track CapsLock state globally
+	document.addEventListener('keydown', (e) => {
+		if (e.getModifierState) {
+			isCapsLockOn = e.getModifierState('CapsLock');
+		}
+	});
+	
+	// for Capslock logic
+	document.addEventListener('keyup', (e) => {
+    isCapsLockOn = e.getModifierState('CapsLock');
+    document.getElementById('capsWarning').style.display = isCapsLockOn ? 'inline' : 'none';
+	});
+	
+	//for spelling and word checker
+	function updateSpellcheckLanguage() {
+        const fullLang = srcLang.value; // e.g., "gu-IN"
+        
+        if (fullLang === 'auto') {
+            notepad.setAttribute('lang', 'en'); // Default to English if Auto
+        } else {
+            // Extracts the primary language code (e.g., "gu" from "gu-IN")
+            const primaryLang = fullLang.split('-')[0]; 
+            notepad.setAttribute('lang', primaryLang);
+        }
+
+        // Force the browser to re-evaluate the text
+        notepad.spellcheck = false;
+        setTimeout(() => {
+            notepad.spellcheck = true;
+        }, 10);
+    }
+
+    // Run when the language dropdown changes
+    srcLang.addEventListener('change', updateSpellcheckLanguage);
+
+    // Initial run
+    updateSpellcheckLanguage();
+
+	// word couts 
+	function updateCounts() {
+    const text = notepad.innerText.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const chars = text.length;
+
+    document.getElementById('wordCount').innerText = `Words: ${words}`;
+    document.getElementById('charCount').innerText = `Characters: ${chars}`;
+}
+
+	// Update counts whenever the user types
+	notepad.addEventListener('input', updateCounts);	
 	
 });
