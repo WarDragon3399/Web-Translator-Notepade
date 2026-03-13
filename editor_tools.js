@@ -13,9 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnUnderline = document.getElementById('underlineBtn');
     const btnStrike = document.getElementById('strikeBtn');
 	const btnBullet = document.getElementById('bulletBtn');
+	const upperBtn = document.getElementById('upperBtn');
+    const lowerBtn = document.getElementById('lowerBtn');
 	const fontSizeSelect = document.getElementById('fontSizeSelect');
 	const fontSelect = document.getElementById('fontStyleSelect');	
 	const srcLang = document.getElementById('srcLang');
+	
+	setTimeout(checkLanguageForCase, 100);
 	
     function format(command) {
         document.execCommand(command, false, null);
@@ -39,6 +43,48 @@ document.addEventListener('DOMContentLoaded', () => {
 		
 		if (document.queryCommandState('insertUnorderedList')) btnBullet.classList.add('format-active');
         else btnBullet.classList.remove('format-active');
+    }
+	
+	//for Casechanger 
+	// 1. Function to handle Case Change
+    function changeCase(type) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount || selection.toString().length === 0) return;
+
+        const selectedText = selection.toString();
+        const replacementText = (type === 'upper') 
+            ? selectedText.toUpperCase() 
+            : selectedText.toLowerCase();
+
+        // Using insertText maintains the undo/redo buffer
+        document.execCommand('insertText', false, replacementText);
+        notepad.focus();
+    }
+
+    // 2. Function to enable/disable buttons based on Language
+    function checkLanguageForCase() {
+        const lang = srcLang.value; 
+        
+        // Enable if language is English (en), OR if it's set to 'auto' 
+        // because auto-detect often handles English.
+        if (lang.startsWith('en') || lang === 'auto') {
+            upperBtn.style.opacity = "1";
+            upperBtn.style.pointerEvents = "auto";
+            upperBtn.style.filter = "grayscale(0%)";
+            
+            lowerBtn.style.opacity = "1";
+            lowerBtn.style.pointerEvents = "auto";
+            lowerBtn.style.filter = "grayscale(0%)";
+        } else {
+            // Disable for Gujarati, Hindi, etc.
+            upperBtn.style.opacity = "0.3";
+            upperBtn.style.pointerEvents = "none";
+            upperBtn.style.filter = "grayscale(100%)";
+            
+            lowerBtn.style.opacity = "0.3";
+            lowerBtn.style.pointerEvents = "none";
+            lowerBtn.style.filter = "grayscale(100%)";
+        }
     }
 	
 	//for font size
@@ -144,7 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnUnderline.addEventListener('click', () => format('underline'));
     btnStrike.addEventListener('click', () => format('strikeThrough'));
 	btnBullet.addEventListener('click', () => format('insertUnorderedList'));
-
+	upperBtn.addEventListener('click', () => changeCase('upper'));
+    lowerBtn.addEventListener('click', () => changeCase('lower'));
+    srcLang.addEventListener('change', checkLanguageForCase);
+	
     // Update buttons whenever the user clicks or moves the cursor in the notepad
     notepad.addEventListener('keyup', updateToolbar);
     notepad.addEventListener('mouseup', updateToolbar);
@@ -166,6 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	
 	// Initial load
     loadSystemFonts();
+	
+	// Run once on load
+	checkLanguageForCase();
 	
 	// --- KEYBOARD SHORTCUTS FOR FORMATTING ---
    // To handle Alt + H + 4, we need to track if H was pressed while Alt was down
