@@ -13,13 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 1. Smart Dual-Sync Initialization ---
     function autoSetDropdowns() {
-        const systemLang = navigator.language; // e.g., 'gu-IN' or 'en-US'
-        const systemBase = systemLang.split('-')[0]; // e.g., 'gu' or 'en'
+        const systemLang = navigator.language;
+        const systemBase = systemLang.split('-')[0];
 
-        // Set Source (Speech-to-Text)
         srcDropdown.value = systemLang;
         if (srcDropdown.selectedIndex === -1) {
-            // Fallback: search for base language match
             for (let i = 0; i < srcDropdown.options.length; i++) {
                 if (srcDropdown.options[i].value.startsWith(systemBase)) {
                     srcDropdown.selectedIndex = i;
@@ -27,24 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        // If still no match, default to English (India)
         if (srcDropdown.selectedIndex <= 0) srcDropdown.value = "en-IN";
 
-        // Set Target (Translation)
         targetDropdown.value = systemBase;
-        // If no match found for target, default to English (en) to avoid Arabic
         if (targetDropdown.selectedIndex === -1) {
             targetDropdown.value = "en";
         }
 
-        // Visual feedback to confirm auto-selection
         [srcDropdown, targetDropdown].forEach(el => {
             el.classList.add('detected-flash');
             setTimeout(() => el.classList.remove('detected-flash'), 1500);
         });
     }
 
-    // Run sync with a tiny delay to ensure DOM stability
     setTimeout(autoSetDropdowns, 100);
 
     // --- 2. Voice Recognition Setup ---
@@ -130,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!text) return;
         const target = targetDropdown.value;
 
-        // Apply RTL for Arabic/Hebrew
         if (target === 'ar' || target === 'he') {
             notepad.style.textAlign = 'right';
             notepad.dir = 'rtl';
@@ -165,24 +157,83 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 4. Event Listeners ---
     micBtn.addEventListener('click', startVoice);
     stopMicBtn.addEventListener('click', stopVoice);
-    document.getElementById('saveBtn').addEventListener('click', () => {
-        const blob = new Blob([notepad.innerText], {type: 'text/plain'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `Note_${Date.now()}.txt`;
-        a.click();
+	
+	// --- 1. TOGGLE SAVE MENU ---
+    const saveMenuBtn = document.getElementById('saveMenuBtn');
+    const saveDropdown = document.getElementById('saveDropdown');
+
+    saveMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevents immediate closing
+        saveDropdown.style.display = saveDropdown.style.display === 'block' ? 'none' : 'block';
     });
+
+    // Close menu if user clicks anywhere else
+    window.addEventListener('click', () => {
+        saveDropdown.style.display = 'none';
+    });
+
+    // --- 2. SAVE AS TEXT (.TXT) ---
+    document.getElementById('saveTxtBtn').addEventListener('click', async () => {
+        const text = notepad.innerText.trim();
+        if (!text) return alert("Nothing to save!");
+
+        if ('showSaveFilePicker' in window) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: 'My_Note.txt',
+                    types: [{ description: 'Text', accept: {'text/plain': ['.txt']} }]
+                });
+                const writable = await handle.createWritable();
+                await writable.write(text);
+                await writable.close();
+
+                // Trigger Ghost Download for History/Flyout
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = (await handle.getFile()).name;
+                a.click();
+            } catch (err) { console.log("Save cancelled"); }
+        }
+    });
+
+    // --- 3. SAVE AS PDF (PRINT) ---
+    document.getElementById('savePdfBtn').addEventListener('click', () => {
+        if (!notepad.innerText.trim()) return alert("Nothing to print!");
+        window.print();
+    });
+
+	// --- KEYBOARD SHORTCUT: CTRL/CMD + S ---
+    document.addEventListener('keydown', (e) => {
+        // Check for S key + Control (Windows) or Meta (Mac)
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            
+            // Only trigger if the user is currently typing in the notepad
+            if (document.activeElement === notepad) {
+                e.preventDefault(); // Stop the browser's default save window
+                
+                // Trigger the click on our existing Text Save button
+                document.getElementById('saveTxtBtn').click();
+            }
+        }
+    });
+
+	//Open file logic
     document.getElementById('openBtn').addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onload = (event) => { notepad.innerText = event.target.result; };
         reader.readAsText(e.target.files[0]);
     });
+
+	//share logic
     document.getElementById('shareBtn').addEventListener('click', () => {
         const text = notepad.innerText.trim();
         if (navigator.share) navigator.share({ title: 'My Note', text: text });
         else window.open(`https://mail.google.com/mail/?view=cm&fs=1&body=${encodeURIComponent(text)}`);
     });
+
     document.getElementById('creditsBtn').addEventListener('click', () => document.getElementById('creditsModal').style.display = 'flex');
     document.getElementById('closeCredits').addEventListener('click', () => document.getElementById('creditsModal').style.display = 'none');
     document.getElementById('convertBtn').addEventListener('click', translateText);
