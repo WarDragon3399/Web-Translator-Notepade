@@ -2,14 +2,14 @@
 "A lightweight, dark-mode translator notepad with voice input and sharing features.
 here is 2 zip one is for Chromium base browser and one for firefox F one is for firefox
 or directly use this as site with this link
-https://wardragon3399.github.io/Web-Translator-Notepade/
+https://wardragon3399.github.io/Web-Translator-Notepad/
 
 ### Language Handling
 - By default, the app detects and works in your device’s native language.
 - Translation and speech models follow a fallback chain:
   1. Local device language pack (PC or mobile).
   2. Alert to download missing pack or use online Google support (download via Android/Windows settings see Wiki  for more info).
-    wiki : https://github.com/WarDragon3399/Web-Translator-Notepade/wiki
+    wiki : https://github.com/WarDragon3399/Web-Translator-Notepad/wiki
   4. Google support (direct web, no API).
   5. If in above all case fail you must download missing pack of setp 2. 
 - Ensures seamless use across European, SEA, Arabic, Indian, and East Asian languages.
