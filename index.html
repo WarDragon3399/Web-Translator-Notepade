@@ -99,6 +99,15 @@
 			.btn-voice { background: #5c2d91; }
 			.btn-stop-voice { background: #d13438; }
 
+			#saveDropdown {
+				background-color: var(--box) !important;
+				color: var(--text);
+			}
+			#saveDropdown div:hover {
+				background-color: var(--accent);
+				color: white;
+			}
+
 			/* --- EDITOR --- */
 			#notepad { 
 				flex: 1; 
@@ -164,22 +173,22 @@
 			}
 
 			@media (max-width: 600px) {
-				#notepad { padding: 20px; font-size: 18px; }
-			}
+				#helpModal, #creditsModal {
+					/* Align to top instead of center so we can scroll down */
+					align-items: flex-start !important; 
+					padding-top: 20px;
+					padding-bottom: 20px;
+					overflow-y: auto; /* Enables scrolling on the dark background */
+				}
 
-
-			/* Editor toolbar CSS */
-			/* Ensure the second toolbar doesn't have a double shadow */
-			#formatToolbar {
-				box-shadow: none;
-				padding-bottom: 10px;
+				#helpModal > div, #creditsModal > div {
+					/* Let the content box expand as much as it needs */
+					height: auto !important;
+					max-height: none !important;
+					margin-bottom: 20px;
+					width: 95%; /* Give it a little bit of side margin */
+				}
 			}
-			
-			//for upperlower case buttons
-			#upperBtn:hover, #lowerBtn:hover {
-				background: var(--accent) !important;
-				transform: scale(1.05);
-			}	
 
 			/* Optional: Make formatting buttons look a bit different */
 			#formatToolbar button {
@@ -195,6 +204,26 @@
 				border: 1px solid white;
 			}
 			
+			/*3rd menu related*/
+			/* Force the highlighted word to be bright blue */
+			#notepad::selection {
+				background-color: #0078d7 !important;
+				color: white !important;
+			}
+
+			/* For mobile/Android browsers */
+			#notepad::selection {
+				background-color: #0078d7 !important;
+				color: white !important;
+			}
+			
+			.found-term {
+				background-color: #ff9800 !important; /* Bright Orange */
+				color: black !important;
+				border-radius: 2px;
+				box-shadow: 0 0 5px rgba(0,0,0,0.5);
+			}
+			
 			/* Misc */
 			#capsWarning {
 			display: none;
@@ -203,20 +232,51 @@
 			font-weight: bold;
 			margin-left: 10px;
 		}
+		
+		/*Print as PDF*/
+		@media print {
+			/* 1. Hide every UI element */
+			.toolbar, 
+			#statusBar, 
+			#saveDropdown, 
+			.modal-overlay {
+				display: none !important;
+			}
+
+			/* 2. Reset the body so it doesn't clip the text */
+			body {
+				background: white !important;
+				color: black !important;
+				overflow: visible !important;
+				height: auto !important;
+			}
+
+			/* 3. Make the notepad take up the whole page */
+			#notepad {
+				padding: 0 !important;
+				margin: 0 !important;
+				border: none !important;
+				width: 100% !important;
+				height: auto !important;
+				overflow: visible !important;
+				background: white !important;
+				color: black !important;
+				font-size: 14pt !important; /* Standard print size */
+			}
+
+			/* 4. Optional: Remove any dark theme scrollbars or shadows */
+			* {
+				box-shadow: none !important;
+				text-shadow: none !important;
+			}
+		}
 		</style>
 	</head>
 	<body>
 
 	<div class="toolbar">
-	   <div style="position: relative; display: inline-block;">
+		<div style="position: relative; display: inline-block;">
 			<button id="saveMenuBtn" style="background: #2e89ff;">💾 Save As... ▾</button>
-			<div id="saveDropdown" style="display: none; position: absolute; top: 100%; left: 0; background: var(--box); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 100; min-width: 150px;">
-			   <div id="saveTxtBtn" style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-					<span>📝 Text (.txt)</span>
-					<span style="opacity: 0.5; font-size: 11px;">Ctrl+S</span>
-				</div>
-				<div id="savePdfBtn" style="padding: 10px; cursor: pointer;">📄 PDF (Print)</div>
-			</div>
 		</div>
 		<button id="openBtn" class="btn-open">📂 Open</button>
 			<input type="file" id="fileInput" style="display: none;" accept=".txt">
@@ -310,9 +370,29 @@
 			<button id="colorBtn" title="Text Color" style="background: #333; display: flex; align-items: center; gap: 5px;">
 				<span style="color: #ff5555; border-bottom: 2px solid currentColor;">A</span>
 			</button>
-			<input type="color" id="colorPicker" style="display: none;" value="#2e89ff">	
+			<input type="color" id="colorPicker" style="display: none;" value="#2e89ff">
+			<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
+			<button id="toggleExtraBtn" style="background: #673ab7; color: white;">🛠️ Extra Tools ▾</button>		
 		<div style="width:1px; background:var(--border); height:20px; margin:0 5px;"></div>
-	</div>	
+	</div>
+	<div class="toolbar" id="extraToolbar" style="display: none;">
+		<div id="findContainer" style="display: flex; gap: 5px; align-items: center;">
+			<input type="text" id="findInput" placeholder="Find..." style="width: 120px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); background: #222; color: white;">
+				<button id="findNextBtn" title="Find Next" style="background: #444;">↓</button>
+				<button id="findAllBtn" title="Find All" style="background: #444;">All</button>
+				<span id="findStatus" style="font-size: 11px; color: #888; min-width: 40px;">0/0</span>
+		</div>
+		<div style="width:1px; background:var(--border); height:20px; margin:0 10px;"></div>
+		<button id="clearFormatBtn" style="background: #444;">🧹 Clear</button>
+		<div id="replaceContainer" style="display: flex; gap: 5px; align-items: center;">
+			<input type="text" id="replaceInput" placeholder="Replace with..." style="width: 120px; padding: 5px; border-radius: 4px; border: 1px solid var(--border); background: #222; color: white;">
+			<button id="replaceBtn" title="Replace Current" style="background: #444;">Replace</button>
+			<button id="replaceAllBtn" title="Replace All" style="background: #444;">Replace All</button>
+		</div>
+		<button id="timestampToggle">⏱️ Time: OFF</button>
+		<span id="sessionTimer" style="display:none;">00:00:00</span>
+		<button id="sanitizeNotepadBtn" style="background: #607d8b; color: white;">🧹 Clear Formatting</button>
+	</div>
 	<div id="notepad" contenteditable="true" spellcheck="true" lang="en"></div>
 	<div id="statusBar" style="background: var(--box); padding: 5px 15px; font-size: 12px; border-top: 1px solid var(--border); display: flex; gap: 20px; color: #888;">
 		<span id="wordCount">Words: 0</span>
@@ -321,6 +401,18 @@
 	
 	<script src="logic.js"></script>
 	<script src="editor_tools.js"></script>
+	<script src="find.js"></script>
+	<script src="replace.js"></script>
+	<script src="timestamp.js"></script>
+	<script src="clear.js"></script>
+	
+	<div id="saveDropdown" style="display: none; position: fixed; background: var(--box); border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 9999; min-width: 180px;">
+		<div id="saveTxtBtn" style="padding: 12px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+			<span>📝 Text (.txt)</span>
+			<span style="opacity: 0.5; font-size: 11px;">Ctrl+S</span>
+		</div>
+		<div id="savePdfBtn" style="padding: 12px; cursor: pointer;">📄 PDF (Print)</div>
+	</div>
 	<div id="helpModal" class="modal-overlay">
 		<div style="background: var(--box); color: var(--text); padding: 25px; border-radius: 15px; border: 2px solid var(--accent); width: 100%; max-width: 650px; box-shadow: 0 20px 50px rgba(0,0,0,0.7); text-align: center; box-sizing: border-box; overflow: hidden;">
 			
